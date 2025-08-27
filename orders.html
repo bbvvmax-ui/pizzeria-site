@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bergsjö Pizzeria – Admin</title>
+<style>
+  body{font-family:system-ui; margin:0; padding:0; background:#f7f7f9; color:#111;}
+  .container{max-width:1100px;margin:0 auto;padding:16px;}
+  h1{font-size:24px;}
+  h2{margin-top:24px;}
+  .order{background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:16px;margin-bottom:12px;box-shadow:0 10px 25px rgba(0,0,0,.06);}
+  .order-header{display:flex;justify-content:space-between;align-items:center;}
+  .btn{padding:6px 12px;border:1px solid #111;background:#fff;border-radius:12px;cursor:pointer;}
+  .btn.delivered{background:#4ade80;color:#fff;border:none;}
+  .muted{color:#6b7280;}
+  .new-order{animation: blink 2s ease;}
+  @keyframes blink{
+    0%,100%{background:#fff;}
+    50%{background:#fef3c7;}
+  }
+  #clearBtn {margin-bottom:16px; padding:6px 12px; background:#f87171; color:#fff; border:none; border-radius:12px; cursor:pointer;}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Admin – Beställningar</h1>
+  <button id="clearBtn">Ta bort alla beställningar</button>
+
+  <h2>Nya beställningar</h2>
+  <div id="newOrders"></div>
+
+  <h2>Pågående</h2>
+  <div id="ongoingOrders"></div>
+
+  <h2>Levererade</h2>
+  <div id="deliveredOrders"></div>
+</div>
+
+<script>
+const newEl = document.getElementById('newOrders');
+const ongoingEl = document.getElementById('ongoingOrders');
+const deliveredEl = document.getElementById('deliveredOrders');
+const clearBtn = document.getElementById('clearBtn');
+
+let orders = [];
+let notifiedOrders = new Set(); // håller koll på vilka order som redan spelat ljud
+
+// Ljud för ny order från lokal fil
+const beepAudio = new Audio('alarm.mp3');
+
+function renderOrder(order, index){
+  const div = document.createElement('div');
+  div.className = 'order';
+  if(order.isNew) div.classList.add('new-order');
+
+  div.innerHTML = `
+    <div class="order-header">
+      <div><strong>${order.customer.name}</strong> (${order.customer.phone})</div>
+      <div>
+        ${order.isNew && !order.delivered ? `<button class="btn" data-action="start">Markera pågående</button>` : ''}
+        <button class="btn ${order.delivered?'delivered':''}" data-action="delivered">${order.delivered?'Levererad':'Markera levererad'}</button>
+      </div>
+    </div>
+
+    <div class="muted"><strong>Typ:</strong> ${order.method==='delivery' ? 'Hemleverans' : 'Avhämtning'}</div>
+    ${order.method==='delivery' ? `
+      <div class="muted"><strong>Adress:</strong> ${order.customer.address}</div>
+      <div class="muted"><strong>Postnr:</strong> ${order.customer.postal}</div>
+      <div class="muted"><strong>Stad:</strong> ${order.customer.city}</div>` : ''}
+    <div class="muted"><strong>Tid:</strong> ${order.customer.time}</div>
+    ${order.note ? `<div class="muted"><strong>Notering:</strong> ${order.note}</div>` : ''}
+
+    <ul style="margin-top:6px; padding-left:18px;">
+      ${order.items.map(i=>`<li>${i.qty} x ${i.name}</li>`).join('')}
+    </ul>
+
+    <div class="muted" style="margin-top:8px; font-weight:bold;">Totalt: ${order.totals.total}</div>
+  `;
+
+  div.querySelectorAll('button').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const action = btn.dataset.action;
+      if(action === 'start'){
+        orders[index].isNew = false;
+        localStorage.setItem('orders', JSON.stringify(orders));
+        loadOrders();
+      } else if(action === 'delivered'){
+        orders[index].delivered = !orders[index].delivered;
+        orders[index].isNew = false;
+        localStorage.setItem('orders', JSON.stringify(orders));
+        loadOrders();
+      }
+    });
+  });
+
+  return div;
+}
+
+function loadOrders() {
+  orders = JSON.parse(localStorage.getItem('orders') || '[]');
+
+  // Sätt nya beställningar
+  orders.forEach(o => { if(o.isNew === undefined) o.isNew = true; });
+
+  // Ljud om nya beställningar som inte notifierats tidigare
+  orders.forEach((order, idx) => {
+    if(order.isNew && !notifiedOrders.has(idx)){
+      beepAudio.currentTime = 0;
+      beepAudio.play();
+      notifiedOrders.add(idx);
+    }
+  });
+
+  // Rensa visning
+  newEl.innerHTML = '';
+  ongoingEl.innerHTML = '';
+  deliveredEl.innerHTML = '';
+
+  // Visa nyaste först
+  const reversedOrders = [...orders].reverse();
+
+  reversedOrders.forEach((order,index)=>{
+    const orderDiv = renderOrder(order, orders.length - 1 - index); // matcha index till original
+    if(order.isNew && !order.delivered){
+      newEl.appendChild(orderDiv);
+    } else if(!order.delivered){
+      ongoingEl.appendChild(orderDiv);
+    } else {
+      deliveredEl.appendChild(orderDiv);
+    }
+  });
+}
+
+// Ta bort alla beställningar
+clearBtn.addEventListener('click', ()=>{
+  if(confirm('Vill du verkligen ta bort alla beställningar?')){
+    localStorage.removeItem('orders');
+    orders = [];
+    notifiedOrders.clear();
+    loadOrders();
+  }
+});
+
+// Uppdatera varje 2 sekunder
+setInterval(loadOrders, 2000);
+loadOrders();
+</script>
+</body>
+</html>
