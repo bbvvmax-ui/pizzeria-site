@@ -463,9 +463,11 @@ window.addEventListener("DOMContentLoaded", () => {
     closeCart();
   });
 
-  document.getElementById("closeModal").addEventListener("click", ()=>{
-    document.getElementById("confirmModal").classList.add("hidden");
-  });
+  // Gör stäng-knappen globalt aktiv (inte inne i submit)
+document.getElementById("closeModal").addEventListener("click", ()=>{
+  document.getElementById("confirmModal").classList.add("hidden");
+});
+
 
   renderPills();
   renderMenu();
@@ -473,8 +475,8 @@ window.addEventListener("DOMContentLoaded", () => {
 });
 
      function closePopup() {
-    document.getElementById('confirmModal').style.display = 'none';
-  }
+    document.getElementById("confirmModal").classList.remove("hidden");
+
 </script>
 
 <!-- Bekräftelsemodal -->
@@ -490,6 +492,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
 </body>
 </html>
+
 
 
 
