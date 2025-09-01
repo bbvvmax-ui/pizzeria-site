@@ -5,9 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Bergsjö Pizzeria – Beställ online</title>
   <style>
-.hidden {
-  display: none !important;
-}
+.hidden { display: none; }
+
     :root{
       --bg:#f7f7f9;--card:#fff;--text:#111;--muted:#6b7280;--border:#e5e7eb;--accent:#111;
       --radius:16px;--shadow:0 10px 25px rgba(0,0,0,.06);
@@ -476,7 +475,7 @@ document.getElementById("closeModal").addEventListener("click", () => {
 
   </script>
 <!-- Bekräftelsemodal -->
-<div id="confirmModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+<div id="confirmModal" class="drawer-backdrop hidden" style="display:flex;align-items:center;justify-content:center; z-index:100;">
   <div class="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl text-center">
     <h2 class="font-semibold text-lg">Tack för din beställning!</h2>
     <p class="text-gray-500 mt-2">För att bekräfta din order måste du ringa:</p>
@@ -488,6 +487,7 @@ document.getElementById("closeModal").addEventListener("click", () => {
 
 </body>
 </html>
+
 
 
 
