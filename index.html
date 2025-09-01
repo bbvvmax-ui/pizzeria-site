@@ -463,7 +463,6 @@ window.addEventListener("DOMContentLoaded", () => {
     closeCart();
   });
 
-  // Gör stäng-knappen globalt aktiv (inte inne i submit)
 document.getElementById("closeModal").addEventListener("click", ()=>{
   document.getElementById("confirmModal").classList.add("hidden");
 });
@@ -475,7 +474,7 @@ document.getElementById("closeModal").addEventListener("click", ()=>{
 });
 
      function closePopup() {
-    document.getElementById("confirmModal").classList.remove("hidden");
+      document.getElementById("confirmModal").classList.remove("hidden");
 
 </script>
 
@@ -492,6 +491,7 @@ document.getElementById("closeModal").addEventListener("click", ()=>{
 
 </body>
 </html>
+
 
 
 
