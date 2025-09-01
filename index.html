@@ -455,7 +455,7 @@
       existingOrders.push(order);
       localStorage.setItem("orders", JSON.stringify(existingOrders));
 
-      alert('Tack! Din beställning har registrerats.');
+      document.getElementById("confirmModal").classList.remove("hidden");
 
       cart.clear();
       updateCartUI();
@@ -465,6 +465,24 @@
     renderPills();
     renderMenu();
     updateCartUI();
+
+document.getElementById("closeModal").addEventListener("click", () => {
+  document.getElementById("confirmModal").classList.add("hidden");
+});
+
+
+<!-- Bekräftelsemodal -->
+<div id="confirmModal" class="drawer-backdrop hidden" style="display:flex;align-items:center;justify-content:center; z-index:100;">
+  <div class="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl text-center">
+    <h2 class="font-semibold text-lg">Tack för din beställning!</h2>
+    <p class="text-gray-500 mt-2">För att bekräfta din order måste du ringa:</p>
+    <p class="my-3 font-bold text-xl">📞 0652-100 58</p>
+    <a href="tel:065210058" class="block bg-black text-white py-3 rounded-xl mt-3">Ring nu</a>
+    <button id="closeModal" class="w-full mt-2 border py-2 rounded-xl">Stäng</button>
+  </div>
+</div>
+
   </script>
 </body>
 </html>
+
