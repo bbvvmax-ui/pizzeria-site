@@ -467,10 +467,19 @@
     updateCartUI();
 
 
-document.getElementById("closeModal").addEventListener("click", () => {
-  document.getElementById("confirmModal").classList.add("hidden");
-});
+const modal = document.getElementById('confirmModal');
+  const openBtn = document.getElementById('submitOrder');
+  const closeBtn = document.getElementById('closeModal');
 
+  // Visa modalen när man klickar på "Skicka beställning"
+  openBtn.addEventListener('click', () => {
+    modal.classList.remove('hidden');
+  });
+
+  // Stäng modalen när man klickar på "Stäng"
+  closeBtn.addEventListener('click', () => {
+    modal.classList.add('hidden');
+  });
   </script>
 <!-- Bekräftelsemodal -->
 <div id="confirmModal" class="drawer-backdrop hidden" style="display:flex;align-items:center;justify-content:center; z-index:100;">
@@ -485,6 +494,7 @@ document.getElementById("closeModal").addEventListener("click", () => {
 
 </body>
 </html>
+
 
 
 
