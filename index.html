@@ -393,12 +393,25 @@
       drawer.classList.remove('hidden');
       backdrop.classList.remove('hidden');
       drawer.setAttribute('aria-hidden','false');
+
+      // Dölj varukorgsknapparna, sticky bar och header
+      open1.classList.add('hidden');
+      open2.classList.add('hidden');
+      document.querySelector('.stickybar').classList.add('hidden');
+      document.querySelector('header').classList.add('hidden');
     }
+
     function closeCart(){
       cartOpen = false;
       drawer.classList.add('hidden');
       backdrop.classList.add('hidden');
       drawer.setAttribute('aria-hidden','true');
+
+      // Visa varukorgsknapparna, sticky bar och header igen
+      open1.classList.remove('hidden');
+      open2.classList.remove('hidden');
+      document.querySelector('.stickybar').classList.remove('hidden');
+      document.querySelector('header').classList.remove('hidden');
     }
 
     open1.addEventListener('click', openCart);
@@ -438,7 +451,6 @@
         when: new Date().toISOString(),
       };
 
-      // Spara order i localStorage
       const existingOrders = JSON.parse(localStorage.getItem("orders") || "[]");
       existingOrders.push(order);
       localStorage.setItem("orders", JSON.stringify(existingOrders));
