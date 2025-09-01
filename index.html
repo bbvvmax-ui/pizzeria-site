@@ -5,6 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Bergsjö Pizzeria – Beställ online</title>
   <style>
+.hidden {
+  display: none !important;
+}
+
     :root{
       --bg:#f7f7f9;--card:#fff;--text:#111;--muted:#6b7280;--border:#e5e7eb;--accent:#111;
       --radius:16px;--shadow:0 10px 25px rgba(0,0,0,.06);
@@ -455,7 +459,6 @@
       existingOrders.push(order);
       localStorage.setItem("orders", JSON.stringify(existingOrders));
 
-     // Visa modalen istället för alert
 document.getElementById("confirmModal").classList.remove("hidden");
 
       cart.clear();
@@ -466,11 +469,9 @@ document.getElementById("confirmModal").classList.remove("hidden");
     renderPills();
     renderMenu();
     updateCartUI();
-// Stäng-knappen i modalen
 document.getElementById("closeModal").addEventListener("click", () => {
   document.getElementById("confirmModal").classList.add("hidden");
 });
-
   </script>
 <!-- Bekräftelsemodal -->
 <div id="confirmModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
@@ -485,5 +486,6 @@ document.getElementById("closeModal").addEventListener("click", () => {
 
 </body>
 </html>
+
 
 
