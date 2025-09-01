@@ -455,7 +455,7 @@
       existingOrders.push(order);
       localStorage.setItem("orders", JSON.stringify(existingOrders));
 
-document.getElementById("confirmModal").classList.remove("hidden");
+    document.getElementById("confirmModal").classList.remove("hidden");
 
       cart.clear();
       updateCartUI();
@@ -466,6 +466,13 @@ document.getElementById("confirmModal").classList.remove("hidden");
     renderMenu();
     updateCartUI();
 
+
+// Stäng-knappen i modalen
+document.getElementById("closeModal").addEventListener("click", () => {
+  document.getElementById("confirmModal").classList.add("hidden");
+});
+
+  </script>
 <!-- Bekräftelsemodal -->
 <div id="confirmModal" class="drawer-backdrop hidden" style="display:flex;align-items:center;justify-content:center;">
   <div style="background:#fff;border-radius:16px;padding:24px;max-width:360px;width:100%;box-shadow:0 10px 30px rgba(0,0,0,0.2);text-align:center">
@@ -476,13 +483,6 @@ document.getElementById("confirmModal").classList.remove("hidden");
     <button id="closeModal" class="btn w-full mt-2">Stäng</button>
   </div>
 </div>
-
-// Stäng-knappen i modalen
-document.getElementById("closeModal").addEventListener("click", ()=>{
-  document.getElementById("confirmModal").classList.add("hidden");
-});
-
-
-  </script>
 </body>
 </html>
+
