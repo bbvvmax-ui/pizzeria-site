@@ -471,6 +471,10 @@ window.addEventListener("DOMContentLoaded", () => {
   renderMenu();
   updateCartUI();
 });
+
+     function closePopup() {
+    document.getElementById('confirmModal').style.display = 'none';
+  }
 </script>
 
 <!-- Bekräftelsemodal -->
@@ -480,12 +484,13 @@ window.addEventListener("DOMContentLoaded", () => {
     <p class="muted mt-2">För att bekräfta din order måste du ringa:</p>
     <p style="margin:12px 0;font-weight:600;font-size:18px">📞 0652-100 58</p>
     <a href="tel:065210058" style="display:block;background:#111;color:#fff;padding:12px;border-radius:12px;margin-top:12px;text-decoration:none">Ring nu</a>
-    <button id="closeModal" class="btn w-full mt-2">Stäng</button>
+    <button id="closeModal" onclick="closePopup()" class="btn w-full mt-2">Stäng</button>
   </div>
 </div>
 
 </body>
 </html>
+
 
 
 
