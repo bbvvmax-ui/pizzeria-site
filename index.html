@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Bergsjö Pizzeria – Beställ online</title>
+  <title>Bergsjö Pizzeria – Beställ online (fixad)</title>
   <style>
     :root{
       --bg:#f7f7f9;--card:#fff;--text:#111;--muted:#6b7280;--border:#e5e7eb;--accent:#111;
@@ -36,6 +36,7 @@
     .stickybar .inner{max-width:1100px;margin:0 auto;padding:0 16px 16px}
     .stickybar .bar{display:flex;justify-content:space-between;align-items:center;background:#fff;border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow);padding:10px 12px}
     .drawer-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.35)}
+    .drawer-backdrop.center{display:flex;align-items:center;justify-content:center;z-index:100}
     .drawer{position:fixed;right:0;top:0;height:100%;width:100%;max-width:460px;background:#fff;box-shadow:-10px 0 30px rgba(0,0,0,.15);padding:18px;overflow:auto}
     .qty-btn{width:28px;height:28px;border:1px solid var(--border);border-radius:999px;background:#fff;cursor:pointer}
     .totals{background:#f6f7fb;border:1px solid var(--border);border-radius:16px;padding:12px;font-size:14px}
@@ -145,11 +146,11 @@
     </div>
 
     <div class="totals mt-2">
-      <div class="row"><span>Delsumma</span><span id="subtotal">0 kr</span></div>
-      <div class="row hidden" id="rowDiscount"><span>Rabatt</span><span id="discountAmt">-0 kr</span></div>
-      <div class="row hidden" id="rowDelivery"><span>Leverans</span><span id="deliveryFee">0 kr</span></div>
-      <div class="row"><span>Beräknad moms (12%)</span><span id="vat">0 kr</span></div>
-      <div class="row" style="border-top:1px solid var(--border);padding-top:8px;margin-top:8px;font-weight:600"><span>Att betala</span><span id="total">0 kr</span></div>
+      <div class="row"><span>Delsumma</span><span id="subtotal">0 kr</span></div>
+      <div class="row hidden" id="rowDiscount"><span>Rabatt</span><span id="discountAmt">-0 kr</span></div>
+      <div class="row hidden" id="rowDelivery"><span>Leverans</span><span id="deliveryFee">0 kr</span></div>
+      <div class="row"><span>Beräknad moms (12%)</span><span id="vat">0 kr</span></div>
+      <div class="row" style="border-top:1px solid var(--border);padding-top:8px;margin-top:8px;font-weight:600"><span>Att betala</span><span id="total">0 kr</span></div>
     </div>
 
     <form id="checkout" class="space-y mt-2">
@@ -234,7 +235,7 @@
     const backdrop = document.getElementById('backdrop');
     const open1 = document.getElementById('openCart');
     const open2 = document.getElementById('openCart2');
-    const closeBtn = document.getElementById('closeCart');
+    const closeCartBtn = document.getElementById('closeCart');
     const emptyCart = document.getElementById('emptyCart');
     const cartItems = document.getElementById('cartItems');
 
@@ -416,7 +417,7 @@
 
     open1.addEventListener('click', openCart);
     open2.addEventListener('click', openCart);
-    closeBtn.addEventListener('click', closeCart);
+    closeCartBtn.addEventListener('click', closeCart);
     backdrop.addEventListener('click', closeCart);
 
     search.addEventListener('input', e=>{ searchQuery = e.target.value; renderMenu(); });
@@ -426,6 +427,9 @@
 
     btnPickup.addEventListener('click', ()=>{ method='pickup'; btnPickup.classList.add('active'); btnDelivery.classList.remove('active'); deliveryFields.classList.add('hidden'); computeTotals(); });
     btnDelivery.addEventListener('click', ()=>{ method='delivery'; btnDelivery.classList.add('active'); btnPickup.classList.remove('active'); deliveryFields.classList.remove('hidden'); computeTotals(); });
+
+    const confirmModal = document.getElementById('confirmModal');
+    const closeModalBtn = document.getElementById('closeModal');
 
     form.addEventListener('submit', (e)=>{
       e.preventDefault();
@@ -455,50 +459,37 @@
       existingOrders.push(order);
       localStorage.setItem("orders", JSON.stringify(existingOrders));
 
-    document.getElementById("confirmModal").classList.remove("hidden");
+      // Visa bekräftelsemodal
+      confirmModal.classList.remove('hidden');
+      confirmModal.classList.add('center');
 
+      // Rensa kundvagn
       cart.clear();
       updateCartUI();
       closeCart();
     });
 
+    // Stäng modalen via knappen
+    closeModalBtn.addEventListener('click', ()=>{ confirmModal.classList.add('hidden'); confirmModal.classList.remove('center'); });
+
+    // Klicka på backdrop för att stänga modal
+    confirmModal.addEventListener('click', (e)=>{ if(e.target === confirmModal){ confirmModal.classList.add('hidden'); confirmModal.classList.remove('center'); } });
+
     renderPills();
     renderMenu();
     updateCartUI();
-
-
-const modal = document.getElementById('confirmModal');
-  const openBtn = document.getElementById('submitOrder');
-  const closeBtn = document.getElementById('closeModal');
-
-  // Visa modalen när man klickar på "Skicka beställning"
-  openBtn.addEventListener('click', () => {
-    modal.classList.remove('hidden');
-  });
-
-  // Stäng modalen när man klickar på "Stäng"
-  closeBtn.addEventListener('click', () => {
-    modal.classList.add('hidden');
-  });
   </script>
+
 <!-- Bekräftelsemodal -->
-<div id="confirmModal" class="drawer-backdrop hidden" style="display:flex;align-items:center;justify-content:center; z-index:100;">
-  <div class="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl text-center">
+<div id="confirmModal" class="drawer-backdrop hidden center">
+  <div class="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl text-center" style="background:#fff;border-radius:20px;padding:24px;">
     <h2 class="font-semibold text-lg">Tack för din beställning!</h2>
     <p class="text-gray-500 mt-2">För att bekräfta din order måste du ringa:</p>
     <p class="my-3 font-bold text-xl">📞 0652-100 58</p>
-    <a href="tel:065210058" class="block bg-black text-white py-3 rounded-xl mt-3">Ring nu</a>
-    <button id="closeModal" class="w-full mt-2 border py-2 rounded-xl">Stäng</button>
+    <a href="tel:065210058" class="block bg-black text-white py-3 rounded-xl mt-3" style="text-decoration:none;color:#fff;">Ring nu</a>
+    <button id="closeModal" class="w-full mt-2 border py-2 rounded-xl" style="margin-top:12px;">Stäng</button>
   </div>
 </div>
 
 </body>
 </html>
-
-
-
-
-
-
-
-
