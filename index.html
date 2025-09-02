@@ -5,6 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Bergsjö Pizzeria – Beställ online</title>
   <style>
+.hidden {
+  display: none !important;
+}
+
     :root{
       --bg:#f7f7f9;--card:#fff;--text:#111;--muted:#6b7280;--border:#e5e7eb;--accent:#111;
       --radius:16px;--shadow:0 10px 25px rgba(0,0,0,.06);
@@ -145,11 +149,11 @@
     </div>
 
     <div class="totals mt-2">
-      <div class="row"><span>Delsumma</span><span id="subtotal">0 kr</span></div>
-      <div class="row hidden" id="rowDiscount"><span>Rabatt</span><span id="discountAmt">-0 kr</span></div>
-      <div class="row hidden" id="rowDelivery"><span>Leverans</span><span id="deliveryFee">0 kr</span></div>
-      <div class="row"><span>Beräknad moms (12%)</span><span id="vat">0 kr</span></div>
-      <div class="row" style="border-top:1px solid var(--border);padding-top:8px;margin-top:8px;font-weight:600"><span>Att betala</span><span id="total">0 kr</span></div>
+      <div class="row"><span>Delsumma</span><span id="subtotal">0 kr</span></div>
+      <div class="row hidden" id="rowDiscount"><span>Rabatt</span><span id="discountAmt">-0 kr</span></div>
+      <div class="row hidden" id="rowDelivery"><span>Leverans</span><span id="deliveryFee">0 kr</span></div>
+      <div class="row"><span>Beräknad moms (12%)</span><span id="vat">0 kr</span></div>
+      <div class="row" style="border-top:1px solid var(--border);padding-top:8px;margin-top:8px;font-weight:600"><span>Att betala</span><span id="total">0 kr</span></div>
     </div>
 
     <form id="checkout" class="space-y mt-2">
@@ -200,271 +204,289 @@
     © <span id="year"></span> Bergsjö Pizzeria · Denna sida är en demo. Byggd i ren HTML, CSS & JS.
   </footer>
 
-  <script>
-    const SEK = new Intl.NumberFormat('sv-SE',{style:'currency',currency:'SEK'});
-    const MENU = [
-      {id:'p1', name:'Margherita', description:'Tomatsås, mozzarella, färsk basilika', price:95, category:'Pizza', tags:['klassiker']},
-      {id:'p2', name:'Vesuvio', description:'Tomatsås, ost, skinka', price:105, category:'Pizza', tags:['populär']},
-      {id:'p3', name:'Kebabpizza', description:'Kebabkött, lök, feferoni, sås', price:119, category:'Pizza', tags:['stark']},
-      {id:'p4', name:'Capricciosa', description:'Skinka, champinjoner', price:115, category:'Pizza'},
-      {id:'k1', name:'Kebabtallrik', description:'Kebabkött, pommes, sallad, sås', price:129, category:'Kebab', tags:['mättande']},
-      {id:'k2', name:'Kebabrulle', description:'Kebabkött i tunnbröd med sallad & sås', price:119, category:'Kebab'},
-      {id:'s1', name:'Grekisk sallad', description:'Fetaost, oliver, tomat, gurka, rödlök', price:109, category:'Sallad', tags:['vegetarisk']},
-      {id:'d1', name:'Läsk 33cl', description:'Coca-Cola, Fanta, Sprite (ange val i notering)', price:25, category:'Dryck'},
-      {id:'d2', name:'Mineralvatten 50cl', description:'Naturell eller citron', price:25, category:'Dryck'},
-    ];
-    const CATEGORIES = ['Alla','Pizza','Kebab','Sallad','Dryck'];
+ <script>
+window.addEventListener("DOMContentLoaded", () => {
+  const SEK = new Intl.NumberFormat('sv-SE',{style:'currency',currency:'SEK'});
+  const MENU = [
+    {id:'p1', name:'Margherita', description:'Tomatsås, mozzarella, färsk basilika', price:95, category:'Pizza', tags:['klassiker']},
+    {id:'p2', name:'Vesuvio', description:'Tomatsås, ost, skinka', price:105, category:'Pizza', tags:['populär']},
+    {id:'p3', name:'Kebabpizza', description:'Kebabkött, lök, feferoni, sås', price:119, category:'Pizza', tags:['stark']},
+    {id:'p4', name:'Capricciosa', description:'Skinka, champinjoner', price:115, category:'Pizza'},
+    {id:'k1', name:'Kebabtallrik', description:'Kebabkött, pommes, sallad, sås', price:129, category:'Kebab', tags:['mättande']},
+    {id:'k2', name:'Kebabrulle', description:'Kebabkött i tunnbröd med sallad & sås', price:119, category:'Kebab'},
+    {id:'s1', name:'Grekisk sallad', description:'Fetaost, oliver, tomat, gurka, rödlök', price:109, category:'Sallad', tags:['vegetarisk']},
+    {id:'d1', name:'Läsk 33cl', description:'Coca-Cola, Fanta, Sprite (ange val i notering)', price:25, category:'Dryck'},
+    {id:'d2', name:'Mineralvatten 50cl', description:'Naturell eller citron', price:25, category:'Dryck'},
+  ];
+  const CATEGORIES = ['Alla','Pizza','Kebab','Sallad','Dryck'];
 
-    let activeCategory = 'Alla';
-    let searchQuery = '';
-    let sortBy = 'popular';
-    let cartOpen = false;
-    let method = 'pickup';
-    const cart = new Map();
+  let activeCategory = 'Alla';
+  let searchQuery = '';
+  let sortBy = 'popular';
+  let cartOpen = false;
+  let method = 'pickup';
+  const cart = new Map();
 
-    const pills = document.getElementById('categoryPills');
-    const search = document.getElementById('search');
-    const sort = document.getElementById('sort');
-    const grid = document.getElementById('menuGrid');
-    const cartCount = document.getElementById('cartCount');
-    const barTitle = document.getElementById('barTitle');
-    const barSubtitle = document.getElementById('barSubtitle');
+  const pills = document.getElementById('categoryPills');
+  const search = document.getElementById('search');
+  const sort = document.getElementById('sort');
+  const grid = document.getElementById('menuGrid');
+  const cartCount = document.getElementById('cartCount');
+  const barTitle = document.getElementById('barTitle');
+  const barSubtitle = document.getElementById('barSubtitle');
 
-    const drawer = document.getElementById('drawer');
-    const backdrop = document.getElementById('backdrop');
-    const open1 = document.getElementById('openCart');
-    const open2 = document.getElementById('openCart2');
-    const closeBtn = document.getElementById('closeCart');
-    const emptyCart = document.getElementById('emptyCart');
-    const cartItems = document.getElementById('cartItems');
+  const drawer = document.getElementById('drawer');
+  const backdrop = document.getElementById('backdrop');
+  const open1 = document.getElementById('openCart');
+  const open2 = document.getElementById('openCart2');
+  const closeBtn = document.getElementById('closeCart');
+  const emptyCart = document.getElementById('emptyCart');
+  const cartItems = document.getElementById('cartItems');
 
-    const btnPickup = document.getElementById('btnPickup');
-    const btnDelivery = document.getElementById('btnDelivery');
-    const discountInput = document.getElementById('discount');
-    const rowDiscount = document.getElementById('rowDiscount');
-    const rowDelivery = document.getElementById('rowDelivery');
-    const subtotalEl = document.getElementById('subtotal');
-    const discountEl = document.getElementById('discountAmt');
-    const deliveryFeeEl = document.getElementById('deliveryFee');
-    const vatEl = document.getElementById('vat');
-    const totalEl = document.getElementById('total');
+  const btnPickup = document.getElementById('btnPickup');
+  const btnDelivery = document.getElementById('btnDelivery');
+  const discountInput = document.getElementById('discount');
+  const rowDiscount = document.getElementById('rowDiscount');
+  const rowDelivery = document.getElementById('rowDelivery');
+  const subtotalEl = document.getElementById('subtotal');
+  const discountEl = document.getElementById('discountAmt');
+  const deliveryFeeEl = document.getElementById('deliveryFee');
+  const vatEl = document.getElementById('vat');
+  const totalEl = document.getElementById('total');
 
-    const form = document.getElementById('checkout');
-    const deliveryFields = document.getElementById('deliveryFields');
-    const fName = document.getElementById('name');
-    const fPhone = document.getElementById('phone');
-    const fAddress = document.getElementById('address');
-    const fPostal = document.getElementById('postal');
-    const fCity = document.getElementById('city');
-    const fTime = document.getElementById('time');
+  const form = document.getElementById('checkout');
+  const deliveryFields = document.getElementById('deliveryFields');
+  const fName = document.getElementById('name');
+  const fPhone = document.getElementById('phone');
+  const fAddress = document.getElementById('address');
+  const fPostal = document.getElementById('postal');
+  const fCity = document.getElementById('city');
+  const fTime = document.getElementById('time');
 
-    document.getElementById('year').textContent = new Date().getFullYear();
+  document.getElementById('year').textContent = new Date().getFullYear();
 
-    function makePill(label){
-      const b = document.createElement('button');
-      b.className = 'pill' + (activeCategory===label?' active':'');
-      b.textContent = label;
-      b.addEventListener('click', ()=>{ activeCategory = label; renderMenu(); renderPills(); });
-      return b;
+  function makePill(label){
+    const b = document.createElement('button');
+    b.className = 'pill' + (activeCategory===label?' active':'');
+    b.textContent = label;
+    b.addEventListener('click', ()=>{ activeCategory = label; renderMenu(); renderPills(); });
+    return b;
+  }
+
+  function renderPills(){
+    pills.innerHTML = '';
+    CATEGORIES.forEach(c=> pills.appendChild(makePill(c)) );
+  }
+
+  function filteredMenu(){
+    let data = MENU.filter(m => activeCategory==='Alla' ? true : m.category===activeCategory);
+    if(searchQuery){
+      const q = searchQuery.toLowerCase();
+      data = data.filter(m => m.name.toLowerCase().includes(q) || m.description.toLowerCase().includes(q) || m.category.toLowerCase().includes(q));
+    }
+    switch(sortBy){
+      case 'priceLow': data.sort((a,b)=>a.price-b.price); break;
+      case 'priceHigh': data.sort((a,b)=>b.price-a.price); break;
+      case 'name': data.sort((a,b)=> a.name.localeCompare(b.name,'sv')); break;
+    }
+    return data;
+  }
+
+  function renderMenu(){
+    const data = filteredMenu();
+    grid.innerHTML = '';
+    data.forEach(item=>{
+      const card = document.createElement('div');
+      card.className = 'card menu-card';
+      card.innerHTML = `
+        <div class="flex justify-between items-center gap-3">
+          <div style="flex:1">
+            <div class="font-semibold" style="font-size:16px">${item.name}</div>
+            <div class="muted text-sm" style="margin-top:6px">${item.description}</div>
+            ${(item.tags||[]).length?`<div class="flex gap-2" style="margin-top:8px">${item.tags.map(t=>`<span class='tag'>${t}</span>`).join('')}</div>`:''}
+          </div>
+          <div class="text-right">
+            <div class="font-semibold">${SEK.format(item.price)}</div>
+            <button class="btn" style="margin-top:8px">Lägg till</button>
+          </div>
+        </div>`;
+      card.querySelector('button').addEventListener('click',()=>{ addToCart(item); });
+      grid.appendChild(card);
+    });
+  }
+
+  function cartQty(){
+    let s = 0; for (const {qty} of cart.values()) s += qty; return s;
+  }
+
+  function addToCart(item){
+    if(!cart.has(item.id)) cart.set(item.id,{item, qty:0});
+    cart.get(item.id).qty++;
+    updateCartUI();
+  }
+
+  function updateCartUI(){
+    const count = cartQty();
+    cartCount.textContent = `(${count})`;
+    if(count>0){
+      barTitle.textContent = `${count} varor i varukorgen`;
+      barSubtitle.textContent = 'Dra i korgen för att justera, rabattkod i kassan.';
+    } else {
+      barTitle.textContent = 'Ingen vara i varukorgen';
+      barSubtitle.textContent = 'Lägg till produkter för att beställa.';
     }
 
-    function renderPills(){
-      pills.innerHTML = '';
-      CATEGORIES.forEach(c=> pills.appendChild(makePill(c)) );
-    }
-
-    function filteredMenu(){
-      let data = MENU.filter(m => activeCategory==='Alla' ? true : m.category===activeCategory);
-      if(searchQuery){
-        const q = searchQuery.toLowerCase();
-        data = data.filter(m => m.name.toLowerCase().includes(q) || m.description.toLowerCase().includes(q) || m.category.toLowerCase().includes(q));
-      }
-      switch(sortBy){
-        case 'priceLow': data.sort((a,b)=>a.price-b.price); break;
-        case 'priceHigh': data.sort((a,b)=>b.price-a.price); break;
-        case 'name': data.sort((a,b)=> a.name.localeCompare(b.name,'sv')); break;
-      }
-      return data;
-    }
-
-    function renderMenu(){
-      const data = filteredMenu();
-      grid.innerHTML = '';
-      data.forEach(item=>{
-        const card = document.createElement('div');
-        card.className = 'card menu-card';
-        card.innerHTML = `
+    if(count===0){
+      emptyCart.classList.remove('hidden');
+      cartItems.classList.add('hidden');
+      cartItems.innerHTML = '';
+    } else {
+      emptyCart.classList.add('hidden');
+      cartItems.classList.remove('hidden');
+      cartItems.innerHTML = '';
+      for(const {item, qty} of cart.values()){
+        const row = document.createElement('div');
+        row.className = 'card';
+        row.innerHTML = `
           <div class="flex justify-between items-center gap-3">
-            <div style="flex:1">
-              <div class="font-semibold" style="font-size:16px">${item.name}</div>
-              <div class="muted text-sm" style="margin-top:6px">${item.description}</div>
-              ${(item.tags||[]).length?`<div class="flex gap-2" style="margin-top:8px">${item.tags.map(t=>`<span class='tag'>${t}</span>`).join('')}</div>`:''}
+            <div>
+              <div class="font-medium">${item.name}</div>
+              <div class="muted text-xs">${SEK.format(item.price)} · ${item.category}</div>
             </div>
-            <div class="text-right">
-              <div class="font-semibold">${SEK.format(item.price)}</div>
-              <button class="btn" style="margin-top:8px">Lägg till</button>
+            <div class="flex items-center gap-2">
+              <button class="qty-btn" aria-label="Minska">-</button>
+              <div style="width:24px;text-align:center">${qty}</div>
+              <button class="qty-btn" aria-label="Öka">+</button>
             </div>
           </div>`;
-        card.querySelector('button').addEventListener('click',()=>{ addToCart(item); });
-        grid.appendChild(card);
-      });
-    }
-
-    function cartQty(){
-      let s = 0; for (const {qty} of cart.values()) s += qty; return s;
-    }
-
-    function addToCart(item){
-      if(!cart.has(item.id)) cart.set(item.id,{item, qty:0});
-      cart.get(item.id).qty++;
-      updateCartUI();
-    }
-
-    function updateCartUI(){
-      const count = cartQty();
-      cartCount.textContent = `(${count})`;
-      if(count>0){
-        barTitle.textContent = `${count} varor i varukorgen`;
-        barSubtitle.textContent = 'Dra i korgen för att justera, rabattkod i kassan.';
-      } else {
-        barTitle.textContent = 'Ingen vara i varukorgen';
-        barSubtitle.textContent = 'Lägg till produkter för att beställa.';
+        const [minus, plus] = row.querySelectorAll('.qty-btn');
+        minus.addEventListener('click',()=>{ changeQty(item.id,-1); });
+        plus.addEventListener('click',()=>{ changeQty(item.id, 1); });
+        cartItems.appendChild(row);
       }
-
-      if(count===0){
-        emptyCart.classList.remove('hidden');
-        cartItems.classList.add('hidden');
-        cartItems.innerHTML = '';
-      } else {
-        emptyCart.classList.add('hidden');
-        cartItems.classList.remove('hidden');
-        cartItems.innerHTML = '';
-        for(const {item, qty} of cart.values()){
-          const row = document.createElement('div');
-          row.className = 'card';
-          row.innerHTML = `
-            <div class="flex justify-between items-center gap-3">
-              <div>
-                <div class="font-medium">${item.name}</div>
-                <div class="muted text-xs">${SEK.format(item.price)} · ${item.category}</div>
-              </div>
-              <div class="flex items-center gap-2">
-                <button class="qty-btn" aria-label="Minska">-</button>
-                <div style="width:24px;text-align:center">${qty}</div>
-                <button class="qty-btn" aria-label="Öka">+</button>
-              </div>
-            </div>`;
-          const [minus, plus] = row.querySelectorAll('.qty-btn');
-          minus.addEventListener('click',()=>{ changeQty(item.id,-1); });
-          plus.addEventListener('click',()=>{ changeQty(item.id, 1); });
-          cartItems.appendChild(row);
-        }
-      }
-      computeTotals();
     }
+    computeTotals();
+  }
 
-    function changeQty(id, delta){
-      if(!cart.has(id)) return;
-      cart.get(id).qty = Math.max(0, cart.get(id).qty + delta);
-      if(cart.get(id).qty===0) cart.delete(id);
-      updateCartUI();
-    }
-
-    function computeTotals(){
-      let subtotal = 0; for(const {item, qty} of cart.values()) subtotal += item.price*qty;
-      const code = (discountInput.value||'').trim().toUpperCase();
-      const discount = code==='HEJ10' ? Math.round(subtotal*0.10) : 0;
-      const deliveryFee = (method==='delivery' && subtotal<300 && subtotal>0) ? 39 : 0;
-      const vat = Math.round((subtotal - discount) * 0.12);
-      const total = subtotal - discount + deliveryFee;
-
-      subtotalEl.textContent = SEK.format(subtotal);
-      discountEl.textContent = '-' + SEK.format(discount).replace('-', '');
-      deliveryFeeEl.textContent = SEK.format(deliveryFee);
-      vatEl.textContent = SEK.format(vat);
-      totalEl.textContent = SEK.format(total);
-
-      rowDiscount.classList.toggle('hidden', discount===0);
-      rowDelivery.classList.toggle('hidden', deliveryFee===0);
-    }
-
-    function openCart(){
-      cartOpen = true;
-      drawer.classList.remove('hidden');
-      backdrop.classList.remove('hidden');
-      drawer.setAttribute('aria-hidden','false');
-
-      // Dölj varukorgsknapparna, sticky bar och header
-      open1.classList.add('hidden');
-      open2.classList.add('hidden');
-      document.querySelector('.stickybar').classList.add('hidden');
-      document.querySelector('header').classList.add('hidden');
-    }
-
-    function closeCart(){
-      cartOpen = false;
-      drawer.classList.add('hidden');
-      backdrop.classList.add('hidden');
-      drawer.setAttribute('aria-hidden','true');
-
-      // Visa varukorgsknapparna, sticky bar och header igen
-      open1.classList.remove('hidden');
-      open2.classList.remove('hidden');
-      document.querySelector('.stickybar').classList.remove('hidden');
-      document.querySelector('header').classList.remove('hidden');
-    }
-
-    open1.addEventListener('click', openCart);
-    open2.addEventListener('click', openCart);
-    closeBtn.addEventListener('click', closeCart);
-    backdrop.addEventListener('click', closeCart);
-
-    search.addEventListener('input', e=>{ searchQuery = e.target.value; renderMenu(); });
-    sort.addEventListener('change', e=>{ sortBy = e.target.value; renderMenu(); });
-
-    discountInput.addEventListener('input', computeTotals);
-
-    btnPickup.addEventListener('click', ()=>{ method='pickup'; btnPickup.classList.add('active'); btnDelivery.classList.remove('active'); deliveryFields.classList.add('hidden'); computeTotals(); });
-    btnDelivery.addEventListener('click', ()=>{ method='delivery'; btnDelivery.classList.add('active'); btnPickup.classList.remove('active'); deliveryFields.classList.remove('hidden'); computeTotals(); });
-
-    form.addEventListener('submit', (e)=>{
-      e.preventDefault();
-      const required = ['name','phone', ...(method==='delivery' ? ['address','postal'] : [])];
-      const values = { name:fName.value.trim(), phone:fPhone.value.trim(), address:fAddress?.value?.trim()||'', postal:fPostal?.value?.trim()||'', city:fCity.value.trim(), time:fTime.value };
-      const missing = required.filter(k=> !values[k]);
-      if(cart.size===0){ alert('Varukorgen är tom. Lägg till något först.'); return; }
-      if(missing.length){ alert('Fyll i obligatoriska fält: ' + missing.join(', ')); return; }
-
-      const items = [...cart.values()].map(({item, qty})=>({ id:item.id, name:item.name, price:item.price, qty }));
-      const order = {
-        method,
-        items,
-        note: document.getElementById('note').value,
-        totals: {
-          subtotal: subtotalEl.textContent,
-          discount: rowDiscount.classList.contains('hidden')? '0 kr' : discountEl.textContent,
-          delivery: rowDelivery.classList.contains('hidden')? '0 kr' : deliveryFeeEl.textContent,
-          vat: vatEl.textContent,
-          total: totalEl.textContent,
-        },
-        customer: values,
-        when: new Date().toISOString(),
-      };
-
-      const existingOrders = JSON.parse(localStorage.getItem("orders") || "[]");
-      existingOrders.push(order);
-      localStorage.setItem("orders", JSON.stringify(existingOrders));
-
-      alert('Tack! Din beställning har registrerats.');
-
-      cart.clear();
-      updateCartUI();
-      closeCart();
-    });
-
-    renderPills();
-    renderMenu();
+  function changeQty(id, delta){
+    if(!cart.has(id)) return;
+    cart.get(id).qty = Math.max(0, cart.get(id).qty + delta);
+    if(cart.get(id).qty===0) cart.delete(id);
     updateCartUI();
-  </script>
+  }
+
+  function computeTotals(){
+    let subtotal = 0; for(const {item, qty} of cart.values()) subtotal += item.price*qty;
+    const code = (discountInput.value||'').trim().toUpperCase();
+    const discount = code==='HEJ10' ? Math.round(subtotal*0.10) : 0;
+    const deliveryFee = (method==='delivery' && subtotal<300 && subtotal>0) ? 39 : 0;
+    const vat = Math.round((subtotal - discount) * 0.12);
+    const total = subtotal - discount + deliveryFee;
+
+    subtotalEl.textContent = SEK.format(subtotal);
+    discountEl.textContent = '-' + SEK.format(discount).replace('-', '');
+    deliveryFeeEl.textContent = SEK.format(deliveryFee);
+    vatEl.textContent = SEK.format(vat);
+    totalEl.textContent = SEK.format(total);
+
+    rowDiscount.classList.toggle('hidden', discount===0);
+    rowDelivery.classList.toggle('hidden', deliveryFee===0);
+  }
+
+  function openCart(){
+    cartOpen = true;
+    drawer.classList.remove('hidden');
+    backdrop.classList.remove('hidden');
+    drawer.setAttribute('aria-hidden','false');
+    open1.classList.add('hidden');
+    open2.classList.add('hidden');
+    document.querySelector('.stickybar').classList.add('hidden');
+    document.querySelector('header').classList.add('hidden');
+  }
+
+  function closeCart(){
+    cartOpen = false;
+    drawer.classList.add('hidden');
+    backdrop.classList.add('hidden');
+    drawer.setAttribute('aria-hidden','true');
+    open1.classList.remove('hidden');
+    open2.classList.remove('hidden');
+    document.querySelector('.stickybar').classList.remove('hidden');
+    document.querySelector('header').classList.remove('hidden');
+  }
+
+  open1.addEventListener('click', openCart);
+  open2.addEventListener('click', openCart);
+  closeBtn.addEventListener('click', closeCart);
+  backdrop.addEventListener('click', closeCart);
+
+  search.addEventListener('input', e=>{ searchQuery = e.target.value; renderMenu(); });
+  sort.addEventListener('change', e=>{ sortBy = e.target.value; renderMenu(); });
+
+  discountInput.addEventListener('input', computeTotals);
+
+  btnPickup.addEventListener('click', ()=>{ method='pickup'; btnPickup.classList.add('active'); btnDelivery.classList.remove('active'); deliveryFields.classList.add('hidden'); computeTotals(); });
+  btnDelivery.addEventListener('click', ()=>{ method='delivery'; btnDelivery.classList.add('active'); btnPickup.classList.remove('active'); deliveryFields.classList.remove('hidden'); computeTotals(); });
+
+  form.addEventListener('submit', (e)=>{
+    e.preventDefault();
+    const required = ['name','phone', ...(method==='delivery' ? ['address','postal'] : [])];
+    const values = { name:fName.value.trim(), phone:fPhone.value.trim(), address:fAddress?.value?.trim()||'', postal:fPostal?.value?.trim()||'', city:fCity.value.trim(), time:fTime.value };
+    const missing = required.filter(k=> !values[k]);
+    if(cart.size===0){ alert('Varukorgen är tom. Lägg till något först.'); return; }
+    if(missing.length){ alert('Fyll i obligatoriska fält: ' + missing.join(', ')); return; }
+
+    const items = [...cart.values()].map(({item, qty})=>({ id:item.id, name:item.name, price:item.price, qty }));
+    const order = {
+      method,
+      items,
+      note: document.getElementById('note').value,
+      totals: {
+        subtotal: subtotalEl.textContent,
+        discount: rowDiscount.classList.contains('hidden')? '0 kr' : discountEl.textContent,
+        delivery: rowDelivery.classList.contains('hidden')? '0 kr' : deliveryFeeEl.textContent,
+        vat: vatEl.textContent,
+        total: totalEl.textContent,
+      },
+      customer: values,
+      when: new Date().toISOString(),
+    };
+
+    const existingOrders = JSON.parse(localStorage.getItem("orders") || "[]");
+    existingOrders.push(order);
+    localStorage.setItem("orders", JSON.stringify(existingOrders));
+
+    document.getElementById("confirmModal").classList.remove("hidden");
+
+    cart.clear();
+    updateCartUI();
+    closeCart();
+  });
+
+  document.getElementById("closeModal").addEventListener("click", ()=>{
+    document.getElementById("confirmModal").classList.add("hidden");
+  });
+
+  renderPills();
+  renderMenu();
+  updateCartUI();
+});
+
+     function closePopup() {
+    document.getElementById('confirmModal').style.display = 'none';
+  }
+</script>
+
+<!-- Bekräftelsemodal -->
+<div id="confirmModal" class="drawer-backdrop hidden" style="display:flex;align-items:center;justify-content:center; z-index:100;">
+  <div style="background:#fff;border-radius:16px;padding:24px;max-width:360px;width:100%;box-shadow:0 10px 30px rgba(0,0,0,0.2);text-align:center">
+    <h2 class="font-semibold">Tack för din beställning!</h2>
+    <p class="muted mt-2">För att bekräfta din order måste du ringa:</p>
+    <p style="margin:12px 0;font-weight:600;font-size:18px">📞 0652-100 58</p>
+    <a href="tel:065210058" style="display:block;background:#111;color:#fff;padding:12px;border-radius:12px;margin-top:12px;text-decoration:none">Ring nu</a>
+    <button id="closeModal" onclick="closePopup()" class="btn w-full mt-2">Stäng</button>
+  </div>
+</div>
+
 </body>
 </html>
