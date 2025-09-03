@@ -9,9 +9,9 @@
   .container{max-width:1100px;margin:0 auto;padding:16px;}
   h1{font-size:24px;}
   h2{margin-top:24px;}
-  .order{background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:16px;margin-bottom:12px;box-shadow:0 10px 25px rgba(0,0,0,.06);}
+  .order{background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:16px;margin-bottom:12px;box-shadow:0 10px 25px rgba(0,0,0,.06);cursor:pointer;}
   .order-header{display:flex;justify-content:space-between;align-items:center;}
-  .btn{padding:6px 12px;border:1px solid #111;background:#fff;border-radius:12px;cursor:pointer;}
+  .btn{padding:6px 12px;border:1px solid #111;background:#fff;border-radius:12px;cursor:pointer; margin:4px 4px 0 0;}
   .btn.delivered{background:#4ade80;color:#fff;border:none;}
   .muted{color:#6b7280;}
   .new-order{animation: blink 2s ease;}
@@ -20,6 +20,30 @@
     50%{background:#fef3c7;}
   }
   #clearBtn {margin-bottom:16px; padding:6px 12px; background:#f87171; color:#fff; border:none; border-radius:12px; cursor:pointer;}
+
+  /* Modal */
+  #orderModal {
+    display:none;
+    position:fixed; top:0; left:0; width:100%; height:100%;
+    background:rgba(0,0,0,0.4);
+    justify-content:center; align-items:center;
+    z-index:1000;
+  }
+  #orderModalContent {
+    background:#fff; padding:20px; border-radius:16px;
+    max-width:600px; width:90%; max-height:80vh; overflow-y:auto;
+  }
+  #closeModal {
+    float:right; background:none; border:none; font-size:20px; cursor:pointer;
+  }
+  #modalActions {
+    margin-top:16px; display:flex; flex-wrap:wrap;
+  }
+  #deleteOrderBtn {
+    background:#f87171; color:#fff; border:none;
+  }
+  #startOrderBtn {background:#facc15; border:none;}
+  #deliveredOrderBtn {background:#4ade80; color:#fff; border:none;}
 </style>
 </head>
 <body>
@@ -37,16 +61,37 @@
   <div id="deliveredOrders"></div>
 </div>
 
+<!-- Modal för orderdetaljer -->
+<div id="orderModal">
+  <div id="orderModalContent">
+    <button id="closeModal">&times;</button>
+    <div id="orderDetails"></div>
+    <div id="modalActions">
+      <button class="btn" id="startOrderBtn">Markera pågående</button>
+      <button class="btn" id="deliveredOrderBtn">Markera levererad</button>
+      <button class="btn" id="deleteOrderBtn">Ta bort beställning</button>
+    </div>
+  </div>
+</div>
+
 <script>
 const newEl = document.getElementById('newOrders');
 const ongoingEl = document.getElementById('ongoingOrders');
 const deliveredEl = document.getElementById('deliveredOrders');
 const clearBtn = document.getElementById('clearBtn');
 
-let orders = [];
-let notifiedOrders = new Set(); // håller koll på vilka order som redan spelat ljud
+const modal = document.getElementById('orderModal');
+const modalContent = document.getElementById('orderDetails');
+const closeModal = document.getElementById('closeModal');
 
-// Ljud för ny order från lokal fil
+const deleteOrderBtn = document.getElementById('deleteOrderBtn');
+const startOrderBtn = document.getElementById('startOrderBtn');
+const deliveredOrderBtn = document.getElementById('deliveredOrderBtn');
+
+let orders = [];
+let notifiedOrders = new Set(); 
+let currentOrderIndex = null;
+
 const beepAudio = new Audio('alarm.mp3');
 
 function renderOrder(order, index){
@@ -62,7 +107,6 @@ function renderOrder(order, index){
         <button class="btn ${order.delivered?'delivered':''}" data-action="delivered">${order.delivered?'Levererad':'Markera levererad'}</button>
       </div>
     </div>
-
     <div class="muted"><strong>Typ:</strong> ${order.method==='delivery' ? 'Hemleverans' : 'Avhämtning'}</div>
     ${order.method==='delivery' ? `
       <div class="muted"><strong>Adress:</strong> ${order.customer.address}</div>
@@ -70,40 +114,129 @@ function renderOrder(order, index){
       <div class="muted"><strong>Stad:</strong> ${order.customer.city}</div>` : ''}
     <div class="muted"><strong>Tid:</strong> ${order.customer.time}</div>
     ${order.note ? `<div class="muted"><strong>Notering:</strong> ${order.note}</div>` : ''}
-
     <ul style="margin-top:6px; padding-left:18px;">
-      ${order.items.map(i=>`<li>${i.qty} x ${i.name}</li>`).join('')}
+      ${order.items.map(i=>{
+        const sizeText = i.size ? ` (${i.size})` : '';
+        return `<li>${i.qty} x ${i.name}${sizeText}</li>`;
+      }).join('')}
     </ul>
-
     <div class="muted" style="margin-top:8px; font-weight:bold;">Totalt: ${order.totals.total}</div>
   `;
 
   div.querySelectorAll('button').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
+    btn.addEventListener('click', (e)=>{
+      e.stopPropagation();
       const action = btn.dataset.action;
       if(action === 'start'){
         orders[index].isNew = false;
-        localStorage.setItem('orders', JSON.stringify(orders));
-        loadOrders();
       } else if(action === 'delivered'){
         orders[index].delivered = !orders[index].delivered;
         orders[index].isNew = false;
-        localStorage.setItem('orders', JSON.stringify(orders));
-        loadOrders();
       }
+      localStorage.setItem('orders', JSON.stringify(orders));
+      loadOrders();
     });
+  });
+
+  div.addEventListener('click', ()=>{
+    showOrderDetails(order, index);
   });
 
   return div;
 }
 
+function showOrderDetails(order, index) {
+  currentOrderIndex = index;
+  modalContent.innerHTML = `
+    <h2>${order.customer.name} (${order.customer.phone})</h2>
+    <p><strong>Typ:</strong> ${order.method==='delivery' ? 'Hemleverans' : 'Avhämtning'}</p>
+    ${order.method==='delivery' ? `
+      <p><strong>Adress:</strong> ${order.customer.address}</p>
+      <p><strong>Postnr:</strong> ${order.customer.postal}</p>
+      <p><strong>Stad:</strong> ${order.customer.city}</p>` : ''}
+    <p><strong>Tid:</strong> ${order.customer.time}</p>
+    ${order.note ? `<p><strong>Notering:</strong> ${order.note}</p>` : ''}
+    <ul>
+      ${order.items.map(i=>{
+        const sizeText = i.size ? ` (${i.size})` : '';
+        return `<li>${i.qty} x ${i.name}${sizeText}</li>`;
+      }).join('')}
+    </ul>
+    <p style="font-weight:bold;">Totalt: ${order.totals.total} kr</p>
+  `;
+
+  // Visa/dölj knappar beroende på status
+  if(order.isNew && !order.delivered){
+    startOrderBtn.style.display = "inline-block";
+  } else {
+    startOrderBtn.style.display = "none";
+  }
+
+  // Levererad-knappen: byt text beroende på status
+  deliveredOrderBtn.textContent = order.delivered ? "Återställ till pågående" : "Markera levererad";
+
+  modal.style.display = "flex";
+}
+
+closeModal.addEventListener('click', ()=> modal.style.display = "none");
+modal.addEventListener('click', (e)=>{ if(e.target === modal) modal.style.display = "none"; });
+
+deleteOrderBtn.addEventListener('click', ()=>{
+  if(currentOrderIndex !== null && confirm("Vill du verkligen ta bort denna beställning?")){
+    orders.splice(currentOrderIndex, 1);
+    localStorage.setItem('orders', JSON.stringify(orders));
+    loadOrders();
+    modal.style.display = "none";
+  }
+});
+
+startOrderBtn.addEventListener('click', ()=>{
+  if(currentOrderIndex !== null){
+    orders[currentOrderIndex].isNew = false;
+    localStorage.setItem('orders', JSON.stringify(orders));
+    loadOrders();
+
+    // Uppdatera knappar i modalen
+    if(orders[currentOrderIndex].delivered){
+      deliveredOrderBtn.textContent = "Återställ till pågående";
+    } else {
+      deliveredOrderBtn.textContent = "Markera levererad";
+    }
+    startOrderBtn.style.display = "none"; // eftersom order inte längre är ny
+  }
+});
+
+deliveredOrderBtn.addEventListener('click', ()=>{
+  if(currentOrderIndex !== null){
+    orders[currentOrderIndex].delivered = !orders[currentOrderIndex].delivered;
+    orders[currentOrderIndex].isNew = false;
+    localStorage.setItem('orders', JSON.stringify(orders));
+    loadOrders();
+
+    // Byt knapptext och färg direkt i modalen
+    if(orders[currentOrderIndex].delivered){
+      deliveredOrderBtn.textContent = "Återställ till pågående";
+      deliveredOrderBtn.style.background = "#facc15"; // gul
+      deliveredOrderBtn.style.color = "#111"; // svart text på gul bakgrund
+    } else {
+      deliveredOrderBtn.textContent = "Markera levererad";
+      deliveredOrderBtn.style.background = "#4ade80"; // grön
+      deliveredOrderBtn.style.color = "#fff"; // vit text på grön bakgrund
+    }
+
+    // Visa/dölj start-knappen beroende på status
+    startOrderBtn.style.display = orders[currentOrderIndex].isNew && !orders[currentOrderIndex].delivered ? "inline-block" : "none";
+  }
+});
+
 function loadOrders() {
   orders = JSON.parse(localStorage.getItem('orders') || '[]');
 
-  // Sätt nya beställningar
-  orders.forEach(o => { if(o.isNew === undefined) o.isNew = true; });
+  orders.forEach(o => { 
+    if(o.isNew === undefined) o.isNew = true;
+    o.items.forEach(i => { if(!i.size) i.size = "Normal"; });
+  });
 
-  // Ljud om nya beställningar som inte notifierats tidigare
   orders.forEach((order, idx) => {
     if(order.isNew && !notifiedOrders.has(idx)){
       beepAudio.currentTime = 0;
@@ -112,16 +245,14 @@ function loadOrders() {
     }
   });
 
-  // Rensa visning
   newEl.innerHTML = '';
   ongoingEl.innerHTML = '';
   deliveredEl.innerHTML = '';
 
-  // Visa nyaste först
   const reversedOrders = [...orders].reverse();
 
   reversedOrders.forEach((order,index)=>{
-    const orderDiv = renderOrder(order, orders.length - 1 - index); // matcha index till original
+    const orderDiv = renderOrder(order, orders.length - 1 - index);
     if(order.isNew && !order.delivered){
       newEl.appendChild(orderDiv);
     } else if(!order.delivered){
@@ -132,7 +263,6 @@ function loadOrders() {
   });
 }
 
-// Ta bort alla beställningar
 clearBtn.addEventListener('click', ()=>{
   if(confirm('Vill du verkligen ta bort alla beställningar?')){
     localStorage.removeItem('orders');
@@ -142,7 +272,6 @@ clearBtn.addEventListener('click', ()=>{
   }
 });
 
-// Uppdatera varje 2 sekunder
 setInterval(loadOrders, 2000);
 loadOrders();
 </script>
