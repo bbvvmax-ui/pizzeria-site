@@ -8,34 +8,22 @@
  .hidden {
   display: none !important;
 }
-    /* === Kategori-knappar === */
-    #category-buttons {
-      display: flex;
-      flex-wrap: wrap;   /* ✅ radbryt knapparna */
-      gap: 0.5rem;
-      justify-content: center;
-      padding: 0.5rem;
-    }
+/* Förhindra att hela sidan scrollar i sidled */
+html, body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
 
-    #category-buttons button {
-      padding: 0.5rem 1rem;
-      border: none;
-      border-radius: 20px;
-      background: #f0f0f0;
-      cursor: pointer;
-      font-size: 1rem;
-      transition: background 0.3s;
-      flex: 0 0 auto; /* så de inte trycks ihop */
-    }
-
-    #category-buttons button.active {
-      background: #ff9800;
-      color: #fff;
-    }
-
-    #category-buttons button:hover {
-      background: #ddd;
-    }
+/* Gör att kategori-knapparna radbryts istället för att ligga i en lång rad */
+#category-buttons {
+  display: flex;
+  flex-wrap: wrap;   /* 🔑 radbryt knapparna */
+  gap: 0.5rem;
+  justify-content: center;
+  padding: 0.5rem;
+  width: 100%;       /* se till att de aldrig blir bredare än skärmen */
+  box-sizing: border-box;
+}
     :root{
       --bg:#f7f7f9;--card:#fff;--text:#111;--muted:#6b7280;--border:#e5e7eb;--accent:#111;
       --radius:16px;--shadow:0 10px 25px rgba(0,0,0,.06);
@@ -645,5 +633,6 @@ function renderMenu(){
 </script>
 </body>
 </html>
+
 
 
