@@ -5,10 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Bergsjö Pizzeria – Beställ online</title>
   <style>
-.hidden {
+ .hidden {
   display: none !important;
 }
-
     :root{
       --bg:#f7f7f9;--card:#fff;--text:#111;--muted:#6b7280;--border:#e5e7eb;--accent:#111;
       --radius:16px;--shadow:0 10px 25px rgba(0,0,0,.06);
@@ -204,21 +203,123 @@
     © <span id="year"></span> Bergsjö Pizzeria · Denna sida är en demo. Byggd i ren HTML, CSS & JS.
   </footer>
 
- <script>
+  <!-- Bekräftelsemodal -->
+  <div id="confirmModal" class="drawer-backdrop hidden" style="display:flex;align-items:center;justify-content:center; z-index:100;">
+    <div style="background:#fff;border-radius:16px;padding:24px;max-width:360px;width:100%;box-shadow:0 10px 30px rgba(0,0,0,0.2);text-align:center">
+      <h2 class="font-semibold">Tack för din beställning!</h2>
+      <p class="muted mt-2">För att bekräfta din order måste du ringa:</p>
+      <p style="margin:12px 0;font-weight:600;font-size:18px">📞 0652-100 58</p>
+      <a href="tel:065210058" style="display:block;background:#111;color:#fff;padding:12px;border-radius:12px;margin-top:12px;text-decoration:none">Ring nu</a>
+      <button id="closeModal" onclick="closePopup()" class="btn w-full mt-2">Stäng</button>
+    </div>
+  </div>
+
+<script>
 window.addEventListener("DOMContentLoaded", () => {
   const SEK = new Intl.NumberFormat('sv-SE',{style:'currency',currency:'SEK'});
   const MENU = [
-    {id:'p1', name:'Margherita', description:'Tomatsås, mozzarella, färsk basilika', price:95, category:'Pizza', tags:['klassiker']},
-    {id:'p2', name:'Vesuvio', description:'Tomatsås, ost, skinka', price:105, category:'Pizza', tags:['populär']},
-    {id:'p3', name:'Kebabpizza', description:'Kebabkött, lök, feferoni, sås', price:119, category:'Pizza', tags:['stark']},
-    {id:'p4', name:'Capricciosa', description:'Skinka, champinjoner', price:115, category:'Pizza'},
-    {id:'k1', name:'Kebabtallrik', description:'Kebabkött, pommes, sallad, sås', price:129, category:'Kebab', tags:['mättande']},
-    {id:'k2', name:'Kebabrulle', description:'Kebabkött i tunnbröd med sallad & sås', price:119, category:'Kebab'},
-    {id:'s1', name:'Grekisk sallad', description:'Fetaost, oliver, tomat, gurka, rödlök', price:109, category:'Sallad', tags:['vegetarisk']},
-    {id:'d1', name:'Läsk 33cl', description:'Coca-Cola, Fanta, Sprite (ange val i notering)', price:25, category:'Dryck'},
-    {id:'d2', name:'Mineralvatten 50cl', description:'Naturell eller citron', price:25, category:'Dryck'},
-  ];
-  const CATEGORIES = ['Alla','Pizza','Kebab','Sallad','Dryck'];
+  // Klassiska pizzor
+  {id:'p1', name:'Margherita', description:'Ost', price:105, category:'Pizza', tags:['KlassiskPizza']},
+  {id:'p2', name:'Vesuvio', description:'Skinka', price:105, category:'Pizza', tags:['KlassiskPizza']},
+  {id:'p3', name:'Calzone (inbakad)', description:'Skinka, champinjoner', price:105, category:'Pizza', tags:['KlassiskPizza']},
+  {id:'p4', name:'Hawaii', description:'Skinka, ananas', price:110, category:'Pizza', tags:['KlassiskPizza']},
+  {id:'p5', name:'Bussola', description:'Skinka, räkor', price:110, category:'Pizza', tags:['KlassiskPizza']},
+  {id:'p6', name:'Capricciosa', description:'Skinka, champinjoner', price:110, category:'Pizza', tags:['KlassiskPizza']},
+  {id:'p7', name:'Neptune', description:'Skinka, tonfisk', price:115, category:'Pizza', tags:['KlassiskPizza']},
+  {id:'p8', name:'Supersnobben', description:'Skinka, köttfärs, färsk vitlök', price:115, category:'Pizza', tags:['KlassiskPizza']},
+  {id:'p9', name:'Napoli', description:'Skinka, räkor, ananas', price:115, category:'Pizza', tags:['KlassiskPizza']},
+  {id:'p10', name:'Millifiore', description:'Skinka, räkor, champinjoner', price:115, category:'Pizza', tags:['KlassiskPizza']},
+  {id:'p11', name:'Primavera', description:'Skinka, bacon, räkor', price:115, category:'Pizza', tags:['KlassiskPizza']},
+  {id:'p12', name:'Calzone Special (inbakad)', description:'Skinka, bacon, räkor', price:115, category:'Pizza', tags:['KlassiskPizza']},
+  {id:'p13', name:'Hawaii Special', description:'Skinka, ananas, banan, curry', price:115, category:'Pizza', tags:['KlassiskPizza']},
+  {id:'p14', name:'Vegetarisk Pizza', description:'Champinjoner, ananas, lök, tomat, pepperoni, paprika, oliver', price:115, category:'Pizza', tags:['KlassiskPizza','Vegetarisk']},
+  {id:'p15', name:'Kyckling Pizza', description:'Kyckling, banan, ananas, curry', price:120, category:'Pizza', tags:['KlassiskPizza']},
+  {id:'p16', name:'Chanti', description:'Kyckling, räkor, ananas, curry', price:120, category:'Pizza', tags:['KlassiskPizza']},
+  {id:'p17', name:'Taromino', description:'Skinka, salami, lök, champinjoner', price:120, category:'Pizza', tags:['KlassiskPizza']},
+  {id:'p18', name:'Lapolard (inbakad)', description:'Skinka, ädelost, creme fraiche', price:120, category:'Pizza', tags:['KlassiskPizza']},
+  {id:'p19', name:'Quattro Stagioni', description:'Skinka, räkor, champinjoner, oliver, musslor, kronärtskocka', price:125, category:'Pizza', tags:['KlassiskPizza']},
+  {id:'p20', name:'Grekisk Pizza', description:'Fetaost, lök, färska tomater, pepperoni, oliver, paprika, vitlökssås', price:125, category:'Pizza', tags:['KlassiskPizza','Vegetarisk']},
+  {id:'p21', name:'Medelhav', description:'Räkor, musslor, crabfish, tonfisk, lök, bearnaisesås', price:125, category:'Pizza', tags:['KlassiskPizza']},
+  {id:'p22', name:'Mamma Mia', description:'Skinka, bacon, champinjoner, ananas, kronärtskocka', price:125, category:'Pizza', tags:['KlassiskPizza']},
+  {id:'p23', name:'Firat Special', description:'Salami, soltorkade tomater, färsk vitlök, ädelost, ruccola', price:125, category:'Pizza', tags:['KlassiskPizza']},
+  {id:'p24', name:'Porky', description:'Skinka, bacon, majs, rödlök, färsk vitlök, BBQ-sås', price:130, category:'Pizza', tags:['KlassiskPizza']},
+  {id:'p25', name:'Taco', description:'Köttfärs, paprika, jalapeno, majs, nachochips', price:130, category:'Pizza', tags:['KlassiskPizza','Stark']},
+  {id:'p26', name:'Du Chef', description:'Skinka, köttfärs, champinjoner, pepperoni, ädelost, bea', price:130, category:'Pizza', tags:['KlassiskPizza']},
+
+  // Kebabpizzor
+  {id:'p27', name:'Istanbul', description:'Kebab, lök, pepperoni, tomat, valfri sås', price:135, category:'Pizza', tags:['KebabPizza']},
+  {id:'p28', name:'Vikingbåt (halvinbakad)', description:'Kebab, lök, pepperoni, tomat, bea', price:135, category:'Pizza', tags:['KebabPizza']},
+  {id:'p29', name:'Fetakebab', description:'Kebab, fetaost, lök, champinjoner, valfri sås', price:135, category:'Pizza', tags:['KebabPizza']},
+  {id:'p30', name:'Kebab Pizza', description:'Kebab, sallad, lök, tomat, pepperoni, valfri sås', price:135, category:'Pizza', tags:['KebabPizza']},
+  {id:'p31', name:'Super Kebab Pizza', description:'Kebab, pommes, lök, tomat, pepperoni, sallad, valfri sås', price:145, category:'Pizza', tags:['KebabPizza']},
+
+  // Italienska pizzor
+  {id:'p32', name:'Quattro Formaggio', description:'Mozzarella, parmesan, fetaost, gorgonzola', price:130, category:'Pizza', tags:['ItalienskPizza']},
+  {id:'p33', name:'Bianca Caprino (vit pizza)', description:'Grädde, mozzarella, salami, fetaost, soltorkade tomater, ruccola, honung', price:140, category:'Pizza', tags:['ItalienskPizza']},
+  {id:'p34', name:'Gondola (vitpizza)', description:'Lufttorkad skinka, fetaost, soltorkade tomater, ruccola', price:140, category:'Pizza', tags:['ItalienskPizza']},
+  {id:'p35', name:'Palermo (vit pizza)', description:'Lufttorkad skinka, champinjoner, fetaost, ruccola', price:140, category:'Pizza', tags:['ItalienskPizza']},
+  {id:'p36', name:'Cesar White (vit pizza)', description:'Kyckling, bacon, crème fraiche, ruccola, parmesan, cesardressing', price:150, category:'Pizza', tags:['ItalienskPizza']},
+
+  // Fläskfilépizzor
+  {id:'p37', name:'Brochet', description:'Fläskfilé, champinjoner, tomat, bea (halvinbakad)', price:140, category:'Pizza', tags:['Fläskfilépizza']},
+  {id:'p38', name:'Bergsö Special', description:'Fläskfilé, tomater, pepperoni, lök, bea', price:140, category:'Pizza', tags:['Fläskfilépizza']},
+  {id:'p39', name:'Rustik', description:'Fläskfilé, lök, champinjoner, ädelost, bearnaisesås', price:140, category:'Pizza', tags:['Fläskfilépizza']},
+  {id:'p40', name:'Ebba', description:'Fläskfilé, lök, paprika, bea (halvinbakad)', price:140, category:'Pizza', tags:['Fläskfilépizza']},
+
+  // Oxfilépizzor
+  {id:'p41', name:'Amore', description:'Oxfilé, bea', price:150, category:'Pizza', tags:['Oxfilépizza']},
+  {id:'p42', name:'Ciao Ciao', description:'Oxfilé, bea, tomater', price:150, category:'Pizza', tags:['Oxfilépizza']},
+  {id:'p43', name:'Husets Special', description:'Oxfilé, paprika, tomater, lök, cayennepeppar, bea', price:150, category:'Pizza', tags:['Oxfilépizza']},
+  {id:'p44', name:'Black & White', description:'Oxfilé, fläskfilé, champinjoner, tomat, bea', price:150, category:'Pizza', tags:['Oxfilépizza']},
+  {id:'p45', name:'Jannes Special', description:'Oxfilé, champinjoner, lök, paprika, ädelost, bearnaisesås', price:150, category:'Pizza', tags:['Oxfilépizza']},
+  {id:'p46', name:'Acapulco', description:'Oxfilé, champinjoner, tacokrydda, tacosås, jalapeno, vitlök, bea', price:150, category:'Pizza', tags:['Oxfilépizza']},
+
+  // Renköttspizzor
+  {id:'p47', name:'Anders Special', description:'Rökt renfilé, champinjoner, stark sås', price:150, category:'Pizza', tags:['Renköttspizza']},
+  {id:'p48', name:'Ilaydas Special', description:'Rökt renfilé, tomat, paprika, ruccola, gräddfil', price:160, category:'Pizza', tags:['Renköttspizza']},
+  {id:'p49', name:'Ronis Special', description:'Rökt renfilé, champinjoner, paprika, mozzarella, cayennepeppar, färsk vitlök', price:160, category:'Pizza', tags:['Renköttspizza']},
+
+  // Kebab/Kyckling/Gyros/Falafel
+  {id:'k1', name:'Med Bröd', description:'Serveras med bröd', price:110, category:'Kebab', tags:[]},
+  {id:'k2', name:'Med Ris', description:'Serveras med ris', price:125, category:'Kebab', tags:[]},
+  {id:'k3', name:'Med Pommes', description:'Serveras med pommes', price:125, category:'Kebab', tags:[]},
+  {id:'k4', name:'Rulle', description:'Kebab/kycklingrulle', price:125, category:'Kebab', tags:[]},
+  {id:'k5', name:'Skrovmål', description:'Stor kebabportion med pommes', price:140, category:'Kebab', tags:[]},
+  {id:'k6', name:'Specialtallrik', description:'Stor portion med pommes', price:140, category:'Kebab', tags:[]},
+
+  // Hamburgare
+  {id:'h1', name:'Big Meal 90 g', description:'Med pommes och dricka', price:115, category:'Hamburgare', tags:[]},
+  {id:'h2', name:'Super Meal 150 g', description:'Med pommes och dricka', price:120, category:'Hamburgare', tags:[]},
+  {id:'h3', name:'Texasburgare', description:'Ost, bacon, BBQ-sås, med pommes och dricka', price:135, category:'Hamburgare', tags:[]},
+  {id:'h4', name:'Bergsjöburgare 180 g', description:'Högrevsdikt kött med ost, bacon, BBQ-sås, pommes, picklad rödlök, majonnäs', price:150, category:'Hamburgare', tags:[]},
+  {id:'h5', name:'Halloumiburgare', description:'Halloumi, sötpotatispommes, aioli', price:165, category:'Hamburgare', tags:['Vegetarisk']},
+
+  // Pastarätter
+  {id:'pa1', name:'Kyckling-Curry', description:'Pasta med kyckling och currysås', price:140, category:'Pasta', tags:[]},
+  {id:'pa2', name:'Fläskfilépasta', description:'Pasta med fläskfilé', price:140, category:'Pasta', tags:[]},
+  {id:'pa3', name:'Pasta Carbonara', description:'Klassisk carbonara', price:140, category:'Pasta', tags:[]},
+  {id:'pa4', name:'Pasta Bolognese', description:'Klassisk bolognese', price:140, category:'Pasta', tags:[]},
+  {id:'pa5', name:'Medelhavspasta', description:'Pasta med medelhavs-smaker', price:140, category:'Pasta', tags:[]},
+  {id:'pa6', name:'Husets Oxfilépasta', description:'Pasta med oxfilé', price:150, category:'Pasta', tags:[]},
+
+  // Barnmeny
+  {id:'b1', name:'Kycklingnuggets', description:'Med pommes och currydipp', price:100, category:'Barnmeny', tags:[]},
+  {id:'b2', name:'Pannkaka', description:'4 st med sylt och grädde', price:100, category:'Barnmeny', tags:[]},
+  {id:'b3', name:'Hamburgartallrik', description:'Med pommes', price:100, category:'Barnmeny', tags:[]},
+  {id:'b4', name:'Köttbullar med mos', description:'Med lingonsylt', price:100, category:'Barnmeny', tags:[]},
+
+  // Sallader
+  {id:'s1', name:'Ost & Skinksallad', description:'Sallad, tomat, gurka, majs, skinka, ost', price:120, category:'Sallad', tags:[]},
+  {id:'s2', name:'Kebabsallad', description:'Sallad, tomater, rödlök, pepperoni, gurka', price:120, category:'Sallad', tags:[]},
+  {id:'s3', name:'Tonfisksallad', description:'Tonfisk, sallad, tomater, gurka, majs, ägg', price:120, category:'Sallad', tags:[]},
+  {id:'s4', name:'Grekisk Sallad', description:'Sallad, tomat, gurka, oliver, fetaost, rödlök, vinägrett', price:120, category:'Sallad', tags:['Vegetarisk']},
+  {id:'s5', name:'Kycklingsallad', description:'Kyckling, sallad, tomat, gurka, majs, ananas', price:130, category:'Sallad', tags:[]},
+  {id:'s6', name:'Räksallad', description:'Räkor, sallad, tomat, gurka, majs, ägg', price:130, category:'Sallad', tags:[]},
+  {id:'s7', name:'Ceasarsallad', description:'Kyckling, sallad, gurka, tomat, bacon, krutonger, ceasardressing', price:130, category:'Sallad', tags:[]},
+  {id:'s8', name:'Västkustsallad', description:'Tonfisk, krabba, muslor, räkor, sallad, tomat, gurka, majs, ägg', price:130, category:'Sallad', tags:[]} 
+];
+
+const CATEGORIES = ['Pizza','Kebab','Hamburgare','Pasta','Sallad','Barnmeny','Dryck'];
 
   let activeCategory = 'Alla';
   let searchQuery = '';
@@ -292,36 +393,77 @@ window.addEventListener("DOMContentLoaded", () => {
     return data;
   }
 
-  function renderMenu(){
-    const data = filteredMenu();
-    grid.innerHTML = '';
-    data.forEach(item=>{
-      const card = document.createElement('div');
-      card.className = 'card menu-card';
-      card.innerHTML = `
-        <div class="flex justify-between items-center gap-3">
-          <div style="flex:1">
-            <div class="font-semibold" style="font-size:16px">${item.name}</div>
-            <div class="muted text-sm" style="margin-top:6px">${item.description}</div>
-            ${(item.tags||[]).length?`<div class="flex gap-2" style="margin-top:8px">${item.tags.map(t=>`<span class='tag'>${t}</span>`).join('')}</div>`:''}
-          </div>
-          <div class="text-right">
-            <div class="font-semibold">${SEK.format(item.price)}</div>
-            <button class="btn" style="margin-top:8px">Lägg till</button>
-          </div>
-        </div>`;
-      card.querySelector('button').addEventListener('click',()=>{ addToCart(item); });
-      grid.appendChild(card);
-    });
+  function calculatePrice(base, size, item){
+    if(size === 'Barn') return base - 10;
+    if(size === 'Familj'){
+      const num = parseInt(item.id.replace('p',''));
+      if(num >= 1 && num <= 9) return 300;
+      if(num >= 10 && num <= 26) return 310;
+      if(num >= 27 && num <= 40) return 335;
+      if(num >= 41 && num <= 49) return 365;
+      return base*2;
+    }
+    return base; // Normal
   }
+
+function renderMenu(){
+  const data = filteredMenu();
+  grid.innerHTML = '';
+  data.forEach(item=>{
+    const card = document.createElement('div');
+    card.className = 'card menu-card';
+    card.innerHTML = `
+      <div class="flex justify-between items-center gap-3">
+        <div style="flex:1">
+          <div class="font-semibold" style="font-size:16px">${item.name}</div>
+          <div class="muted text-sm" style="margin-top:6px">${item.description}</div>
+          ${(item.tags||[]).length?`<div class="flex gap-2" style="margin-top:8px">${item.tags.map(t=>`<span class='tag'>${t}</span>`).join('')}</div>`:''}
+          ${item.category==='Pizza'?`
+          <div style="margin-top:6px">
+            <label class="text-xs font-medium">Storlek:</label>
+            <select class="pizza-size w-full" data-id="${item.id}" style="margin-top:2px;border:1px solid var(--border);border-radius:14px;padding:6px 8px">
+              <option value="Barn">Barn</option>
+              <option value="Normal" selected>Normal</option>
+              <option value="Familj">Familj</option>
+            </select>
+          </div>`:''}
+        </div>
+        <div class="text-right">
+          <div class="font-semibold price-display">${SEK.format(item.price)}</div>
+          <button class="btn" style="margin-top:8px">Lägg till</button>
+        </div>
+      </div>`;
+    
+    const sizeSelect = card.querySelector('.pizza-size');
+    const priceDisplay = card.querySelector('.price-display');
+
+    // --- Lyssna på ändring av storlek ---
+    if(sizeSelect){
+      sizeSelect.addEventListener('change', ()=>{
+        const size = sizeSelect.value;
+        const newPrice = calculatePrice(item.price, size, item);
+        priceDisplay.textContent = SEK.format(newPrice);
+      });
+    }
+
+    // --- Lägg till i varukorgen ---
+    card.querySelector('button').addEventListener('click',()=>{
+      const size = sizeSelect ? sizeSelect.value : 'Normal';
+      addToCart(item,size);
+    });
+
+    grid.appendChild(card);
+  });
+}
 
   function cartQty(){
     let s = 0; for (const {qty} of cart.values()) s += qty; return s;
   }
 
-  function addToCart(item){
-    if(!cart.has(item.id)) cart.set(item.id,{item, qty:0});
-    cart.get(item.id).qty++;
+  function addToCart(item, size='Normal'){
+    const key = item.id + '|' + size;
+    if(!cart.has(key)) cart.set(key,{item, qty:0, size});
+    cart.get(key).qty++;
     updateCartUI();
   }
 
@@ -344,14 +486,15 @@ window.addEventListener("DOMContentLoaded", () => {
       emptyCart.classList.add('hidden');
       cartItems.classList.remove('hidden');
       cartItems.innerHTML = '';
-      for(const {item, qty} of cart.values()){
+      for(const {item, qty, size} of cart.values()){
         const row = document.createElement('div');
         row.className = 'card';
+        const price = calculatePrice(item.price, size, item);
         row.innerHTML = `
           <div class="flex justify-between items-center gap-3">
             <div>
-              <div class="font-medium">${item.name}</div>
-              <div class="muted text-xs">${SEK.format(item.price)} · ${item.category}</div>
+              <div class="font-medium">${item.name} (${size})</div>
+              <div class="muted text-xs">${SEK.format(price)} · ${item.category}</div>
             </div>
             <div class="flex items-center gap-2">
               <button class="qty-btn" aria-label="Minska">-</button>
@@ -360,28 +503,29 @@ window.addEventListener("DOMContentLoaded", () => {
             </div>
           </div>`;
         const [minus, plus] = row.querySelectorAll('.qty-btn');
-        minus.addEventListener('click',()=>{ changeQty(item.id,-1); });
-        plus.addEventListener('click',()=>{ changeQty(item.id, 1); });
+        minus.addEventListener('click',()=>{ changeQty(item.id,size,-1); });
+        plus.addEventListener('click',()=>{ changeQty(item.id,size, 1); });
         cartItems.appendChild(row);
       }
     }
     computeTotals();
   }
 
-  function changeQty(id, delta){
-    if(!cart.has(id)) return;
-    cart.get(id).qty = Math.max(0, cart.get(id).qty + delta);
-    if(cart.get(id).qty===0) cart.delete(id);
+  function changeQty(id,size, delta){
+    const key = id+'|'+size;
+    if(!cart.has(key)) return;
+    cart.get(key).qty = Math.max(0, cart.get(key).qty + delta);
+    if(cart.get(key).qty===0) cart.delete(key);
     updateCartUI();
   }
 
   function computeTotals(){
-    let subtotal = 0; for(const {item, qty} of cart.values()) subtotal += item.price*qty;
+    let subtotal = 0; for(const {item, qty, size} of cart.values()) subtotal += calculatePrice(item.price,size,item)*qty;
     const code = (discountInput.value||'').trim().toUpperCase();
     const discount = code==='HEJ10' ? Math.round(subtotal*0.10) : 0;
-    const deliveryFee = (method==='delivery' && subtotal<300 && subtotal>0) ? 39 : 0;
+    const deliveryFee = method === 'delivery' ? 179 : 0;
     const vat = Math.round((subtotal - discount) * 0.12);
-    const total = subtotal - discount + deliveryFee;
+    const total = subtotal - discount + deliveryFee + vat;
 
     subtotalEl.textContent = SEK.format(subtotal);
     discountEl.textContent = '-' + SEK.format(discount).replace('-', '');
@@ -422,7 +566,6 @@ window.addEventListener("DOMContentLoaded", () => {
 
   search.addEventListener('input', e=>{ searchQuery = e.target.value; renderMenu(); });
   sort.addEventListener('change', e=>{ sortBy = e.target.value; renderMenu(); });
-
   discountInput.addEventListener('input', computeTotals);
 
   btnPickup.addEventListener('click', ()=>{ method='pickup'; btnPickup.classList.add('active'); btnDelivery.classList.remove('active'); deliveryFields.classList.add('hidden'); computeTotals(); });
@@ -436,7 +579,7 @@ window.addEventListener("DOMContentLoaded", () => {
     if(cart.size===0){ alert('Varukorgen är tom. Lägg till något först.'); return; }
     if(missing.length){ alert('Fyll i obligatoriska fält: ' + missing.join(', ')); return; }
 
-    const items = [...cart.values()].map(({item, qty})=>({ id:item.id, name:item.name, price:item.price, qty }));
+    const items = [...cart.values()].map(({item, qty, size})=>({ id:item.id, name:item.name, price:calculatePrice(item.price,size,item), qty, size }));
     const order = {
       method,
       items,
@@ -463,30 +606,14 @@ window.addEventListener("DOMContentLoaded", () => {
     closeCart();
   });
 
-  document.getElementById("closeModal").addEventListener("click", ()=>{
-    document.getElementById("confirmModal").classList.add("hidden");
-  });
+  document.getElementById("closeModal").addEventListener("click", ()=>{ document.getElementById("confirmModal").classList.add("hidden"); });
+
+  function closePopup(){ document.getElementById('confirmModal').style.display = 'none'; }
 
   renderPills();
   renderMenu();
   updateCartUI();
 });
-
-     function closePopup() {
-    document.getElementById('confirmModal').style.display = 'none';
-  }
 </script>
-
-<!-- Bekräftelsemodal -->
-<div id="confirmModal" class="drawer-backdrop hidden" style="display:flex;align-items:center;justify-content:center; z-index:100;">
-  <div style="background:#fff;border-radius:16px;padding:24px;max-width:360px;width:100%;box-shadow:0 10px 30px rgba(0,0,0,0.2);text-align:center">
-    <h2 class="font-semibold">Tack för din beställning!</h2>
-    <p class="muted mt-2">För att bekräfta din order måste du ringa:</p>
-    <p style="margin:12px 0;font-weight:600;font-size:18px">📞 0652-100 58</p>
-    <a href="tel:065210058" style="display:block;background:#111;color:#fff;padding:12px;border-radius:12px;margin-top:12px;text-decoration:none">Ring nu</a>
-    <button id="closeModal" onclick="closePopup()" class="btn w-full mt-2">Stäng</button>
-  </div>
-</div>
-
 </body>
 </html>
